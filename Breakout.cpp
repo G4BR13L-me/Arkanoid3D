@@ -168,15 +168,11 @@ void Breakout::drawGame(void) {
 
 void Breakout::newBall(float x = -1, float y = -1) {
     Ball b1;
-    if (x < 0 || y < 0) {
-        b1.xpos = 0.0;
-        b1.ypos = -5.1f;
-    } else {
-        b1.xpos = x;
-        b1.ypos = y;
-    }
+    b1.xpos = 0.0;
+    b1.ypos = -4.8f;
+    
 	b1.xvel = 0.15f;
-    b1.yvel = 0.15f;
+    b1.yvel = 0.05f;
     b1.radius = BALL_RADIUS;
     b1.r = 0.4f + (float) rand() / (RAND_MAX);
     b1.g = 0.25f + (float) rand() / (RAND_MAX);
@@ -188,113 +184,121 @@ void Breakout::drawBalls(void) {
     for (vector<Ball>::iterator it = balls.begin(); it != balls.end(); ) {
         glPushMatrix();
 		   	glColor3f(it->r, it->g, it->b);
-		   	glTranslatef(0.0, it->ypos, 0.0);
+		   	glTranslatef(it->xpos, it->ypos, 0.0);
 		   	// glScalef (2.5, 0.5, 0.5);
 			glutSolidSphere(it->radius,SPHERE_SEGMENTS,SPHERE_SEGMENTS);
 		   	// objects.drawCube(0.5);
 		glPopMatrix();
-        
+		     
         // Set new position
-        // it->xpos += it->xvel;
-        // it->ypos += it->yvel;
+        it->xpos += it->xvel;
+        it->ypos += it->yvel;
         
         // Collision with left/right/top window sides
-        // if ( (it->xpos <= (2 * it->radius)) || (it ->xpos >= (WINWIDTH - 2 * it->radius)) ) {
-        //     it->xvel *= -1;
-        // }
-        // if ( (it->ypos <= (2 * it->radius)) ) {
-        //     it->yvel *= -1;
-        // }
-        // if (it->ypos >= (WINHEIGHT - 2 * it->radius)) {
-        //     it = balls.erase(it);
-        //     continue;
-        // }
-        // 
+        if (it->xpos > 4.7f || it->xpos < -4.7f) {
+            it->xvel *= -1;
+        }
+        if (it->ypos > 5.2f) {
+            it->yvel *= -1;
+        }
+        if (it->ypos < -5.2f) {
+            it = balls.erase(it);
+            continue;
+        }
+        
         // Collission with the bricks
-        // for (std::vector<Brick>::iterator br = bricks.begin(); br != bricks.end(); ) {
+        for (std::vector<Brick>::iterator br = bricks.begin(); br != bricks.end(); ) {
             // Check collission between circle and vertical brick sides
-        //     if (it->ypos >= br->ypos && it->ypos <= br->ypos + br->height) {
+            if (it->ypos - it->radius >= br->ypos - 0.125f && it->ypos + it->radius <= br->ypos + 0.125f) {
                 // brick right edge and left point on circle
-        //         if ((it->xpos - it->radius - br->xpos - br->width) <= 5 && (it->xpos - it->radius - br->xpos - br->width) >= 0) {
-        //             it->xvel *= -1;
-        //             br = hitBrick(br);
-        //             continue;
-        //         }
-        //         
+                if (it->xpos - it->radius <= br->xpos + 0.25f && it->xpos - it->radius >= br->xpos - 0.25f) {
+                    it->xvel *= -1;
+                    br = hitBrick(br);
+                    cout << "Direita" << endl;
+                    continue;
+                }
+                
                 // brick left edge and right point on circle
-        //         if ((it->xpos + it->radius - br->xpos) >= -5 && (it->xpos + it->radius - br->xpos) <= 0) {
-        //             it->xvel *= -1;
-        //             br = hitBrick(br);
-        //             continue;
-        //         }
-        //     }
-        //     
+                if (it->xpos + it->radius >= br->xpos - 0.25f && it->xpos + it->radius <= br->xpos + 0.25f) {
+                    it->xvel *= -1;
+                    br = hitBrick(br);
+                    cout << "Esquerda" << endl;
+                    continue;
+                }
+            }
+            
             // Check collission between circle and horizontal brick sides
-        //     if (it->xpos >= br->xpos && it->xpos <= br->xpos + br->width) {
+            if (it->xpos - it->radius >= br->xpos - 0.25f && it->xpos + it->radius <= br->xpos + 0.25f) {
                 // brick bottom edge and top point on circle
-        //         if ((it->ypos - it->radius - br->ypos - br->height) <= 10 && (it->ypos - it->radius - br->ypos - br->height) >= 0) {
-        //             it->yvel *= -1;
-        //             br = hitBrick(br);
-        //             continue;
-        //         }
-        //         
+                if (it->ypos + it->radius >= br->ypos - 0.125f && it->ypos + it->radius <= br->ypos + 0.125f) {
+                    it->yvel *= -1;
+                    br = hitBrick(br);
+                    cout << "Baixo" << endl;
+                    continue;
+                }
+                
                 // brick top edge and bottom point on circle
-        //         if ((it->ypos + it->radius - br->ypos) >= -10 && (it->ypos + it->radius - br->ypos) <= 0) {
-        //             it->yvel *= -1;
-        //             br = hitBrick(br);
-        //             continue;
-        //         }
-        //     }
-        //     
-        //     GLfloat d;
+                if (it->ypos - it->radius <= br->ypos + 0.125f && it->ypos - it->radius >= br->ypos - 0.125f) {
+                    it->yvel *= -1;
+                    br = hitBrick(br);
+                    cout << "Cima" << endl;
+                    continue;
+                }
+            }
+            
+            GLfloat d;
             // Check collission with top left corner
-        //     d = pow((it->xpos - br->xpos), 2.0) + pow((it->ypos - br->ypos), 2.0);
-        //     if (d < it->radius + 5.0) {
-        //         it->xvel *= -1;
-        //         it->yvel *= -1;
-        //         br = hitBrick(br);
-        //         continue;
-        //     }
-// 
+            d = pow((it->xpos - br->xpos - 0.25f), 2.0) + pow((it->ypos - br->ypos + 0.125f), 2.0);
+            if (d < it->radius - 1.0) {
+                it->xvel *= -1;
+                it->yvel *= -1;
+                br = hitBrick(br);
+                cout << "bottom right" << endl;
+                continue;
+            }
+
             // Check collission with top right corner
-        //     d = pow((it->xpos - br->xpos - br->width), 2.0) + pow((it->ypos - br->ypos), 2.0);
-        //     if (d < it->radius + 5.0) {
-        //         it->xvel *= -1;
-        //         it->yvel *= -1;
-        //         br = hitBrick(br);
-        //         continue;
-        //     }
-// 
+            d = pow((it->xpos - br->xpos + 0.25f), 2.0) + pow((it->ypos - br->ypos + 0.125f), 2.0);
+            if (d < it->radius - 1.0) {
+                it->xvel *= -1;
+                it->yvel *= -1;
+                br = hitBrick(br);
+                cout << "bottom left" << endl;
+                continue;
+            }
+
             // Check collission with bottom left corner
-        //     d = pow((it->xpos - br->xpos), 2.0) + pow((it->ypos - br->ypos - br->height), 2.0);
-        //     if (d < it->radius + 5.0) {
-        //         it->xvel *= -1;
-        //         it->yvel *= -1;
-        //         br = hitBrick(br);
-        //         continue;
-        //     }
-        //     
+            d = pow((it->xpos - br->xpos - 0.25f), 2.0) + pow((it->ypos - br->ypos - 0.125f), 2.0);
+            if (d < it->radius - 1.0) {
+                it->xvel *= -1;
+                it->yvel *= -1;
+                br = hitBrick(br);
+                cout << "top right" << endl;
+                continue;
+            }
+            
             // Check collission with bottom right corner
-        //     d = pow((it->xpos - br->xpos - br->width), 2.0) + pow((it->ypos - br->ypos - br->height), 2.0);
-        //     if (d < it->radius + 5.0) {
-        //         it->xvel *= -1;
-        //         it->yvel *= -1;
-        //         br = hitBrick(br);
-        //         continue;
-        //     }
-        //     
-        //     ++br; // next brick
-        // }
-        // 
+            d = pow((it->xpos - br->xpos + 0.25f), 2.0) + pow((it->ypos - br->ypos - 0.125f), 2.0);
+            if (d < it->radius - 1.0) {
+                it->xvel *= -1;
+                it->yvel *= -1;
+                br = hitBrick(br);
+                cout << "top left" << endl;
+                continue;
+            }
+            
+            ++br; // next brick
+        }
+        
         // Check collission between paddle's top edge and bottom point on circle
-        // if (it->xpos >= paddle.xpos && it->xpos <= paddle.xpos + paddle.width) {
-        //     if ((it->ypos + it->radius - paddle.ypos) >= -10 && (it->ypos + it->radius - paddle.ypos) <= 0) {
-        //         it->yvel *= -1;
-        //         reward = 100;
-        //         score += reward;
-        //         continue;
-        //     }
-        // }
+        if (it->xpos - it->radius >= paddle.xpos - paddle.width/2 && it->xpos + it->radius <= paddle.xpos + paddle.width/2) {
+            if (it->ypos - it->radius <= paddle.ypos + paddle.height/2 && it->ypos - it->radius >= paddle.ypos - paddle.height/2 ) {
+                it->yvel *= -1;
+                reward = 100;
+                score += reward;
+                continue;
+            }
+        }
         
         ++it; // next ball
     }
@@ -325,8 +329,8 @@ void Breakout::drawBricks(void) {
     for (std::vector<Brick>::iterator it = bricks.begin(); it != bricks.end(); ++it) {
 		glPushMatrix();
     		glColor3f(it->r, it->g, it->b);
-			glTranslatef(-2.6 + it->xpos, 3 - it->ypos, 0);
-			glScalef (1.0, 0.5, 0.5);
+			glTranslatef(it->xpos, it->ypos, 0);
+			glScalef(1.0, 0.5, 0.5);
 			// glutSolidCube(0.5);
 			objects.drawCube(0.5);
 		glPopMatrix();
@@ -370,20 +374,20 @@ void Breakout::bricksLevel1(void) {
     for (int i = 0; i < WALLROWS; ++i) {
         for (int j = 0; j < WALLCOLS; ++j) {
             // Set stronger bricks
-            if(true) {
+            if(false) {
                 newBrick.r = 1.0f;
                 newBrick.g = 0.5f;
                 newBrick.b = 0.5f;
                 newBrick.health = 2;
             } else {
-                newBrick.r = 0.95f;
-                newBrick.g = 0.95f;
-                newBrick.b = 0.95f;
+				newBrick.r = 1.0f;
+                newBrick.g = 0.5f;
+                newBrick.b = 0.5f;
                 newBrick.health = 1;
             }
             
-            newBrick.xpos = j * newBrick.width + j * WALLSPACE;
-            newBrick.ypos = i * newBrick.height + i * WALLSPACE;
+            newBrick.xpos = -2.6 + j * newBrick.width + j * WALLSPACE;
+            newBrick.ypos = -1 + i * newBrick.height + i * WALLSPACE;
             bricks.push_back(newBrick);
         }
     }

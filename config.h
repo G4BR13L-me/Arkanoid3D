@@ -31,7 +31,7 @@ const float PEDALWIDTH = 150.0f;
 const float PEDALHEIGHT = 12.0f;
 
 // Ball settings
-const float BALL_RADIUS = 0.14f;
+const float BALL_RADIUS = 0.08f;
 const int SPHERE_SEGMENTS = 10; // used in drawing ball and the life/heart symbol
 
 #endif
