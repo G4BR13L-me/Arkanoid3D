@@ -8,9 +8,6 @@
 
 #include <iostream>
 #include <assert.h>
-#include "math.h"
-#include<GL/glut.h>
-
 #include "Breakout.h"
 
 
@@ -65,8 +62,6 @@ int main(int argc, char ** argv)
 	glutInitWindowPosition(100, 100);
 	glutCreateWindow(WINTITLE);
     
-	// Init game
-	game.init();
 
 	// Draw scene
 	glutDisplayFunc(myDisplay);
@@ -81,6 +76,13 @@ int main(int argc, char ** argv)
 	glutKeyboardFunc(myKeyStroke);
 	// specify keyboard special key input events
 	glutSpecialFunc(mySpecialKeyStroke);
+	
+	//set 3D view
+    game.set3DView();
+    
+    // Init game
+	game.init();
+	
 	// Enter the opengl event processing loop
 	glutMainLoop();
 

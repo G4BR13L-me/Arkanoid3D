@@ -15,7 +15,7 @@
 		<ProductVersion Value="1.0.0.0"/>
 		<AutoIncrementBuild Value="No"/>
 	</VersionInfo>
-	<Libs Value="-mwindows -static -lglut32 -lglu32 -lopengl32 -lwinmm -lgdi32"/>
+	<Libs Value="-static -lglut32 -lglu32 -lopengl32 -lwinmm -lgdi32"/>
 	<Flags Value="-DGLUT_STATIC"/>
 	<Target Value="Arkanoid.exe"/>
 	<CommandLine Value=""/>
@@ -27,15 +27,14 @@
 	<EnableTheme Value="Yes"/>
 	<RequiresAdmin Value="No"/>
 	<CompilerType Value="CPP"/>
-	<AppType Value="GUI"/>
+	<AppType Value="CONSOLE"/>
 	<Files>
 		<File Name="Breakout.cpp"/>
 		<File Name="Breakout.h"/>
 		<File Name="config.h"/>
-		<File Name="MainMenu.cpp"/>
-		<File Name="MainMenu.h"/>
 		<File Name="MyObjects.h"/>
 		<File Name="main.cpp"/>
+		<File Name="MyObjects.cpp"/>
 	</Files>
 	<AppIcon>
 		0000010001003030000001002000A82500001600000028000000300000006000

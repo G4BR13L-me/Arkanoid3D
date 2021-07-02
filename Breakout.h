@@ -12,10 +12,11 @@
 #include <vector>
 #include <iostream>
 #include <stdlib.h>
-#include <math.h>
-#include<GL/glut.h>
+// #include <math.h>
+// #include<GL/glut.h>
 
 // My includes
+// #include "MyObjects.cpp"
 #include "MyObjects.h"      // Game-specific objects
 #include "config.h"         // Game configurations
 
@@ -28,6 +29,7 @@ public:
     
     // Public functions (handle GLUT calls)
 	void display(void);
+	void set3DView(void);
 	void init(void);
 	void reshape(int width, int height);
 	void mouseClick(int button, int state, int x, int y);

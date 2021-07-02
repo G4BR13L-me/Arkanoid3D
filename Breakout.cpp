@@ -10,7 +10,10 @@
 
 using namespace std;
 
+MyObjects objects;
+
 void recomputeFrame(int value);
+float Sx=-15.0,Tz=0;
 
 Breakout::Breakout() {
     init();
@@ -21,23 +24,15 @@ Breakout::~Breakout() {
 }
 
 void Breakout::display(void) {
-
+	
     // Clear buffer
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    // Set OpenGL for 2D drawing
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glDisable(GL_LIGHTING);
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_TEXTURE_2D);
-    glOrtho(0.0f, WINWIDTH, WINHEIGHT, 0.0f, 0.0f, 1.0f);
-    glMatrixMode(GL_MODELVIEW);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
     
     // Draw my cool gradient background
-    drawBackground();
-
+    //drawBackground();
+	glTranslatef(0.0,0.0,Tz);
+	glRotatef(Sx,1.0,0.0,0.0);
     // Select which state of the game to display
     switch (gameState) {
         case INIT:
@@ -85,6 +80,34 @@ void Breakout::display(void) {
 
 void recomputeFrame(int value) {
 	glutPostRedisplay();
+}
+
+void Breakout::set3DView(void) {
+	// Turn on lighting
+    GLfloat light_position[] = {-1.0, 1.0, 1.0, 0.0};
+	GLfloat light_color[] = {1.0, 1.0, 1.0, 0.0};
+    glLightfv(GL_LIGHT0, GL_AMBIENT_AND_DIFFUSE, light_color);
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+
+	// Turn on material characteristics
+	GLfloat mat_ambient_diffuse[] = {1.0, 1.0, 1.0, 1.0};
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, mat_ambient_diffuse);
+    glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+    glEnable(GL_COLOR_MATERIAL);
+	
+	// Turn on Gouraud shading
+    glShadeModel(GL_SMOOTH);
+	
+	// Turn on z-buffering
+    glEnable(GL_DEPTH_TEST);
+	
+	// set white to be the erase color
+    glClearColor(1.0, 1.0, 1.0, 1.0);
+	
+	// set initial color (blue)
+    glColor3f(0.0, 0.0, 1.0);
 }
 
 void Breakout::init(void) {
@@ -139,24 +162,21 @@ void Breakout::drawGame(void) {
     drawPaddle();
     
     // Draw game statistics (lifes, score)
-    drawGameStats();
+    // drawGameStats();
 
 }
 
 void Breakout::newBall(float x = -1, float y = -1) {
     Ball b1;
     if (x < 0 || y < 0) {
-        b1.xpos = WINWIDTH / 2.0;
-        b1.ypos = WINHEIGHT - 30.0f;
+        b1.xpos = 0.0;
+        b1.ypos = -5.1f;
     } else {
         b1.xpos = x;
         b1.ypos = y;
     }
-    if ((float) rand() / (RAND_MAX) < 0.5)
-        b1.xvel = 5.0f;
-    else
-        b1.xvel = -5.0f;
-    b1.yvel = -10.0f;
+	b1.xvel = 0.15f;
+    b1.yvel = 0.15f;
     b1.radius = BALL_RADIUS;
     b1.r = 0.4f + (float) rand() / (RAND_MAX);
     b1.g = 0.25f + (float) rand() / (RAND_MAX);
@@ -166,118 +186,115 @@ void Breakout::newBall(float x = -1, float y = -1) {
 
 void Breakout::drawBalls(void) {
     for (vector<Ball>::iterator it = balls.begin(); it != balls.end(); ) {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // use GL_LINE if no fill
-        glBegin(GL_POLYGON);
-        glColor3f(it->r, it->g, it->b);
-        for(int j = 0; j < CIRCLE_SEGMENTS; j++) {
-            float const theta = 2.0f * 3.1415926f * (float)j / (float)CIRCLE_SEGMENTS;
-            float const x = it->radius * cosf(theta);
-            float const y = it->radius * sinf(theta);
-            glVertex2f(x + it->xpos, y + it->ypos);
-        }
-        glEnd();
+        glPushMatrix();
+		   	glColor3f(it->r, it->g, it->b);
+		   	glTranslatef(0.0, it->ypos, 0.0);
+		   	// glScalef (2.5, 0.5, 0.5);
+			glutSolidSphere(it->radius,SPHERE_SEGMENTS,SPHERE_SEGMENTS);
+		   	// objects.drawCube(0.5);
+		glPopMatrix();
         
         // Set new position
-        it->xpos += it->xvel;
-        it->ypos += it->yvel;
+        // it->xpos += it->xvel;
+        // it->ypos += it->yvel;
         
         // Collision with left/right/top window sides
-        if ( (it->xpos <= (2 * it->radius)) || (it ->xpos >= (WINWIDTH - 2 * it->radius)) ) {
-            it->xvel *= -1;
-        }
-        if ( (it->ypos <= (2 * it->radius)) ) {
-            it->yvel *= -1;
-        }
-        if (it->ypos >= (WINHEIGHT - 2 * it->radius)) {
-            it = balls.erase(it);
-            continue;
-        }
-        
+        // if ( (it->xpos <= (2 * it->radius)) || (it ->xpos >= (WINWIDTH - 2 * it->radius)) ) {
+        //     it->xvel *= -1;
+        // }
+        // if ( (it->ypos <= (2 * it->radius)) ) {
+        //     it->yvel *= -1;
+        // }
+        // if (it->ypos >= (WINHEIGHT - 2 * it->radius)) {
+        //     it = balls.erase(it);
+        //     continue;
+        // }
+        // 
         // Collission with the bricks
-        for (std::vector<Brick>::iterator br = bricks.begin(); br != bricks.end(); ) {
+        // for (std::vector<Brick>::iterator br = bricks.begin(); br != bricks.end(); ) {
             // Check collission between circle and vertical brick sides
-            if (it->ypos >= br->ypos && it->ypos <= br->ypos + br->height) {
+        //     if (it->ypos >= br->ypos && it->ypos <= br->ypos + br->height) {
                 // brick right edge and left point on circle
-                if ((it->xpos - it->radius - br->xpos - br->width) <= 5 && (it->xpos - it->radius - br->xpos - br->width) >= 0) {
-                    it->xvel *= -1;
-                    br = hitBrick(br);
-                    continue;
-                }
-                
+        //         if ((it->xpos - it->radius - br->xpos - br->width) <= 5 && (it->xpos - it->radius - br->xpos - br->width) >= 0) {
+        //             it->xvel *= -1;
+        //             br = hitBrick(br);
+        //             continue;
+        //         }
+        //         
                 // brick left edge and right point on circle
-                if ((it->xpos + it->radius - br->xpos) >= -5 && (it->xpos + it->radius - br->xpos) <= 0) {
-                    it->xvel *= -1;
-                    br = hitBrick(br);
-                    continue;
-                }
-            }
-            
+        //         if ((it->xpos + it->radius - br->xpos) >= -5 && (it->xpos + it->radius - br->xpos) <= 0) {
+        //             it->xvel *= -1;
+        //             br = hitBrick(br);
+        //             continue;
+        //         }
+        //     }
+        //     
             // Check collission between circle and horizontal brick sides
-            if (it->xpos >= br->xpos && it->xpos <= br->xpos + br->width) {
+        //     if (it->xpos >= br->xpos && it->xpos <= br->xpos + br->width) {
                 // brick bottom edge and top point on circle
-                if ((it->ypos - it->radius - br->ypos - br->height) <= 10 && (it->ypos - it->radius - br->ypos - br->height) >= 0) {
-                    it->yvel *= -1;
-                    br = hitBrick(br);
-                    continue;
-                }
-                
+        //         if ((it->ypos - it->radius - br->ypos - br->height) <= 10 && (it->ypos - it->radius - br->ypos - br->height) >= 0) {
+        //             it->yvel *= -1;
+        //             br = hitBrick(br);
+        //             continue;
+        //         }
+        //         
                 // brick top edge and bottom point on circle
-                if ((it->ypos + it->radius - br->ypos) >= -10 && (it->ypos + it->radius - br->ypos) <= 0) {
-                    it->yvel *= -1;
-                    br = hitBrick(br);
-                    continue;
-                }
-            }
-            
-            GLfloat d;
+        //         if ((it->ypos + it->radius - br->ypos) >= -10 && (it->ypos + it->radius - br->ypos) <= 0) {
+        //             it->yvel *= -1;
+        //             br = hitBrick(br);
+        //             continue;
+        //         }
+        //     }
+        //     
+        //     GLfloat d;
             // Check collission with top left corner
-            d = pow((it->xpos - br->xpos), 2.0) + pow((it->ypos - br->ypos), 2.0);
-            if (d < it->radius + 5.0) {
-                it->xvel *= -1;
-                it->yvel *= -1;
-                br = hitBrick(br);
-                continue;
-            }
-
+        //     d = pow((it->xpos - br->xpos), 2.0) + pow((it->ypos - br->ypos), 2.0);
+        //     if (d < it->radius + 5.0) {
+        //         it->xvel *= -1;
+        //         it->yvel *= -1;
+        //         br = hitBrick(br);
+        //         continue;
+        //     }
+// 
             // Check collission with top right corner
-            d = pow((it->xpos - br->xpos - br->width), 2.0) + pow((it->ypos - br->ypos), 2.0);
-            if (d < it->radius + 5.0) {
-                it->xvel *= -1;
-                it->yvel *= -1;
-                br = hitBrick(br);
-                continue;
-            }
-
+        //     d = pow((it->xpos - br->xpos - br->width), 2.0) + pow((it->ypos - br->ypos), 2.0);
+        //     if (d < it->radius + 5.0) {
+        //         it->xvel *= -1;
+        //         it->yvel *= -1;
+        //         br = hitBrick(br);
+        //         continue;
+        //     }
+// 
             // Check collission with bottom left corner
-            d = pow((it->xpos - br->xpos), 2.0) + pow((it->ypos - br->ypos - br->height), 2.0);
-            if (d < it->radius + 5.0) {
-                it->xvel *= -1;
-                it->yvel *= -1;
-                br = hitBrick(br);
-                continue;
-            }
-            
+        //     d = pow((it->xpos - br->xpos), 2.0) + pow((it->ypos - br->ypos - br->height), 2.0);
+        //     if (d < it->radius + 5.0) {
+        //         it->xvel *= -1;
+        //         it->yvel *= -1;
+        //         br = hitBrick(br);
+        //         continue;
+        //     }
+        //     
             // Check collission with bottom right corner
-            d = pow((it->xpos - br->xpos - br->width), 2.0) + pow((it->ypos - br->ypos - br->height), 2.0);
-            if (d < it->radius + 5.0) {
-                it->xvel *= -1;
-                it->yvel *= -1;
-                br = hitBrick(br);
-                continue;
-            }
-            
-            ++br; // next brick
-        }
-        
+        //     d = pow((it->xpos - br->xpos - br->width), 2.0) + pow((it->ypos - br->ypos - br->height), 2.0);
+        //     if (d < it->radius + 5.0) {
+        //         it->xvel *= -1;
+        //         it->yvel *= -1;
+        //         br = hitBrick(br);
+        //         continue;
+        //     }
+        //     
+        //     ++br; // next brick
+        // }
+        // 
         // Check collission between paddle's top edge and bottom point on circle
-        if (it->xpos >= paddle.xpos && it->xpos <= paddle.xpos + paddle.width) {
-            if ((it->ypos + it->radius - paddle.ypos) >= -10 && (it->ypos + it->radius - paddle.ypos) <= 0) {
-                it->yvel *= -1;
-                reward = 100;
-                score += reward;
-                continue;
-            }
-        }
+        // if (it->xpos >= paddle.xpos && it->xpos <= paddle.xpos + paddle.width) {
+        //     if ((it->ypos + it->radius - paddle.ypos) >= -10 && (it->ypos + it->radius - paddle.ypos) <= 0) {
+        //         it->yvel *= -1;
+        //         reward = 100;
+        //         score += reward;
+        //         continue;
+        //     }
+        // }
         
         ++it; // next ball
     }
@@ -287,39 +304,32 @@ void Breakout::initPaddle(void) {
     paddle.r = 0.2f;
     paddle.g = 0.5f;
     paddle.b = 1.0f;
-    paddle.width = 150.0f;
-    paddle.height = 12.0f;
-    paddle.xpos = WINWIDTH / 2.0f - paddle.width / 2.0f;
-    paddle.ypos = WINHEIGHT - 20.0f;
+    paddle.width = 2.5f;
+    paddle.height = 0.5f;
+    paddle.xpos = 0.0f;
+    paddle.ypos = -5.4f;
 }
 
 void Breakout::drawPaddle() {
-    // Make sure paddle is larger than 25px
-    if (paddle.width < 25) {
-        paddle.width = 25;
-    }
-    
-    glColor3f(paddle.r, paddle.g, paddle.b);
-    glRectf(paddle.xpos, paddle.ypos, paddle.xpos + 5.0f, paddle.ypos + paddle.height);
-    glRectf(paddle.xpos + 10.0f, paddle.ypos, paddle.xpos + paddle.width - 10.0f, paddle.ypos + paddle.height);
-    glRectf(paddle.xpos + paddle.width - 5.0f, paddle.ypos, paddle.xpos + paddle.width, paddle.ypos + paddle.height);
+	glPushMatrix();
+		glColor3f(paddle.r, paddle.g, paddle.b);
+		glTranslatef(paddle.xpos, paddle.ypos, 0.0);
+		glScalef (paddle.width, paddle.height, paddle.height);
+		glutSolidCube(0.5);
+		// objects.drawCube(0.5);
+	glPopMatrix();
 }
 
 void Breakout::drawBricks(void) {
+	
     for (std::vector<Brick>::iterator it = bricks.begin(); it != bricks.end(); ++it) {
-        glColor3f(it->r, it->g, it->b);
-        glRectf(it->xpos, it->ypos, it->xpos + it->width, it->ypos + it->height);
-        
-        // Top cool triangle (kind of texture)
-        glBegin(GL_QUADS);
-        glColor3f(it->r-0.2f, it->g-0.2f, it->b-0.2f);
-        glVertex2f(it->xpos, it->ypos);
-        glColor3f(it->r-0.05f, it->g-0.05f, it->b-0.05f);
-        glVertex2f(it->xpos + it->width, it->ypos);
-        glColor3f(it->r-0.15f, it->g-0.15f, it->b-0.15f);
-        glVertex2f(it->xpos + it->width, it->ypos + it->height);
-        glVertex2f(it->xpos, it->ypos);
-        glEnd();
+		glPushMatrix();
+    		glColor3f(it->r, it->g, it->b);
+			glTranslatef(-2.6 + it->xpos, 3 - it->ypos, 0);
+			glScalef (1.0, 0.5, 0.5);
+			// glutSolidCube(0.5);
+			objects.drawCube(0.5);
+		glPopMatrix();
     }
 }
 
@@ -354,13 +364,13 @@ void Breakout::bricksLevel1(void) {
     newBrick.g = 0.95f;
     newBrick.b = 0.95f;
     newBrick.health = 1;
-    newBrick.width = (WALLWIDTH - (WALLCOLS - 2) * WALLSPACE) / WALLCOLS;
-    newBrick.height = (WALLHEIGHT - (WALLROWS - 2) * WALLSPACE) / WALLROWS;
+    newBrick.width = 0.8;
+    newBrick.height = 0.5;
     
     for (int i = 0; i < WALLROWS; ++i) {
         for (int j = 0; j < WALLCOLS; ++j) {
             // Set stronger bricks
-            if (i+1 > ceil(WALLROWS / 2.0) - 2 && i < ceil(WALLROWS / 2.0) + 2 && j+2 > ceil(WALLCOLS / 2.0) - 3 && j < ceil(WALLCOLS / 2.0) + 3) {
+            if(true) {
                 newBrick.r = 1.0f;
                 newBrick.g = 0.5f;
                 newBrick.b = 0.5f;
@@ -372,8 +382,8 @@ void Breakout::bricksLevel1(void) {
                 newBrick.health = 1;
             }
             
-            newBrick.xpos = WALLX + j * newBrick.width + j * WALLSPACE;
-            newBrick.ypos = WALLY + i * newBrick.height + i * WALLSPACE;
+            newBrick.xpos = j * newBrick.width + j * WALLSPACE;
+            newBrick.ypos = i * newBrick.height + i * WALLSPACE;
             bricks.push_back(newBrick);
         }
     }
@@ -415,7 +425,7 @@ void Breakout::drawGameStats(void) {
     glEnd();
     
     float offset = 25.0f;
-    for (int i = 0; i < lifesCount & i < 10; ++i) {
+    for (int i = 0; i < lifesCount && i < 10; ++i) {
         drawLife(35 + offset * i, 15);
     }
     
@@ -430,8 +440,8 @@ void Breakout::drawLife(float x, float y) {
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glBegin(GL_POLYGON);
     glColor3f(1.0f, 0.2f, 0.2f);
-    for(int j = 0; j < CIRCLE_SEGMENTS; j++) {
-        float const theta = 2.0f * 3.1415926f * (float)j / (float)CIRCLE_SEGMENTS;
+    for(int j = 0; j < SPHERE_SEGMENTS; j++) {
+        float const theta = 2.0f * 3.1415926f * (float)j / (float)SPHERE_SEGMENTS;
         float const xx = scale * 16.0f * sinf(theta) * sinf(theta) * sinf(theta);
         float const yy = -1 * scale * (13.0f * cosf(theta) - 5.0f * cosf(2.0f * theta) - 2 * cosf(3.0f * theta) - cosf(4.0f * theta));
         glVertex2f(x + xx, y + yy);
@@ -478,11 +488,23 @@ void Breakout::drawCoordinate(void) {
 void Breakout::reshape(int width, int height) {
     if (width != WINWIDTH || height != WINHEIGHT)
         glutReshapeWindow(WINWIDTH, WINHEIGHT);
+    
+	glMatrixMode (GL_PROJECTION);
+    glLoadIdentity();
+
+    glViewport (0, 0, (GLsizei) WINWIDTH, (GLsizei) WINHEIGHT);
+
+    gluPerspective(100, (float)WINHEIGHT/(float)WINHEIGHT, 1.0, 100.0);
+    gluLookAt(0.0,0.0,6.5, 	// posição da câmera (olho) 
+			  0.0,0.0,0.0, 	// centro da cena
+			  0.0,1.0,0.0); // direção de cima 
+    
+    glMatrixMode (GL_MODELVIEW);
 }
 
 void Breakout::mouseClick(int button, int state, int x, int y) {
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-        newBall(x, y);
+        newBall(x/100.0, y/100.0);
     }
     
     // Force redraw
@@ -490,19 +512,23 @@ void Breakout::mouseClick(int button, int state, int x, int y) {
 }
 
 void Breakout::mouseMove(int x, int y) {
-    y = WINHEIGHT - y;
-    if (x - paddle.width / 2.0f >= 0 && x + paddle.width / 2.0f <= WINWIDTH) {
-        paddle.xpos = x - paddle.width / 2.0f;
-    } else if (x - paddle.width / 2.0f <= 0) {
-        paddle.xpos = 0;
-    } else if (x + paddle.width / 2.0f >= WINWIDTH) {
-        paddle.xpos = WINWIDTH - paddle.width;
-    }
-	glutPostRedisplay();
+
 }
 
 void Breakout::keyStroke(unsigned char key, int x, int y) {
     switch (key) {
+        case 'w':
+            Tz += 1.0;
+            break;
+        case 's':
+        	Tz += -1.0;
+            break;
+        case 'd':
+        	Sx += 1.0;
+            break;
+        case 'a':
+        	Sx += -1.0;
+            break;
         case 'q': // Exit
             exit(0);
             break;
@@ -518,29 +544,20 @@ void Breakout::keyStroke(unsigned char key, int x, int y) {
         default:
             break;
     }
+    cout << "Sx: " << Sx << endl;
 }
 
 void Breakout::specialKeyPos(int key, int x, int y) {
     switch(key)
 	{
 		case GLUT_KEY_LEFT:
-            if (paddle.xpos > 0) {
-                paddle.xpos -= 5.0f;
-                paddle.xpos -= 5.0f;
-                glutPostRedisplay();
-                paddle.xpos -= 5.0f;
-                paddle.xpos -= 5.0f;
-                glutPostRedisplay();
+            if (paddle.xpos > -5.0) {
+                paddle.xpos -= 0.15f;
             }
             break;
         case GLUT_KEY_RIGHT:
-            if (paddle.xpos + paddle.width < WINWIDTH) {
-                paddle.xpos += 5.0f;
-                paddle.xpos += 5.0f;
-                glutPostRedisplay();
-                paddle.xpos += 5.0f;
-                paddle.xpos += 5.0f;
-                glutPostRedisplay();
+            if (paddle.xpos < 5.0) {
+                paddle.xpos += 0.15f;
             }
             break;
         default:
