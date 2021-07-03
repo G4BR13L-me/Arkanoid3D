@@ -172,7 +172,7 @@ void Breakout::newBall(float x = -1, float y = -1) {
     Ball b1;
     b1.xpos = 0.0;
     b1.ypos = -4.8f;
-    
+    b1.launch = false;
 	b1.xvel = 0.15f/1.5;
     b1.yvel = 0.05f/1.5;
     b1.radius = BALL_RADIUS;
@@ -183,7 +183,7 @@ void Breakout::newBall(float x = -1, float y = -1) {
 }
 
 void Breakout::drawBalls(void) {
-    for( vector<Ball>::iterator it = balls.begin(); it != balls.end(); ) {
+    for( vector<Ball>::iterator it = balls.begin(); it != balls.end(); ++it) {
         glPushMatrix();
 		   	glColor3f(it->r, it->g, it->b);
 		   	glTranslatef(it->xpos, it->ypos, 0.0);
@@ -191,7 +191,11 @@ void Breakout::drawBalls(void) {
 			glutSolidSphere(it->radius,SPHERE_SEGMENTS,SPHERE_SEGMENTS);
 		   	// objects.drawCube(0.5);
 		glPopMatrix();
-		     
+		
+		// Wait launch     
+  		if(!it->launch)
+			continue;
+  		
         // Set new position
         it->xpos += it->xvel;
         it->ypos += it->yvel;
@@ -205,6 +209,7 @@ void Breakout::drawBalls(void) {
         }
         if(it->ypos < -5.2f) {
             it = balls.erase(it);
+            --it;
             continue;
         }
         //br->width/2, br->height/2
@@ -260,8 +265,6 @@ void Breakout::drawBalls(void) {
                 continue;
             }
         }
-        
-        ++it; // next ball
     }
 }
 
@@ -503,6 +506,14 @@ void Breakout::keyStroke(unsigned char key, int x, int y) {
         case 'h':
             lifesCount++;
             break;
+        case 32: // SPACE bar
+			for( vector<Ball>::iterator it = balls.begin(); it != balls.end(); ++it) {     
+		  		if(it->launch)
+	  				continue;
+		  		it->launch = true;
+		  		break;
+		    }
+            break;
         case 27: // Esc button
             exit(0);
             break;
@@ -516,14 +527,24 @@ void Breakout::specialKeyPos(int key, int x, int y) {
     switch(key)
 	{
 		case GLUT_KEY_LEFT:
-            if (paddle.xpos > -5.0) {
+			if (paddle.xpos > -5.0) {
                 paddle.xpos -= 0.15f;
             }
+            for( vector<Ball>::iterator it = balls.begin(); it != balls.end(); ++it) {     
+		  		if(!it->launch){
+					it->xpos -= 0.15f;  
+				}
+		    }
             break;
         case GLUT_KEY_RIGHT:
             if (paddle.xpos < 5.0) {
                 paddle.xpos += 0.15f;
             }
+            for( vector<Ball>::iterator it = balls.begin(); it != balls.end(); ++it) {     
+		  		if(!it->launch){
+					it->xpos += 0.15f;  
+				}
+		    }
             break;
         default:
             break;

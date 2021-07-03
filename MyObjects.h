@@ -24,6 +24,7 @@ struct ponto{
 
 // Ball
 struct Ball {
+	bool launch;
     GLfloat xpos, ypos;
     GLfloat xvel, yvel;
     GLfloat radius;
