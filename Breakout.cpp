@@ -23,6 +23,7 @@ Breakout::~Breakout() {
 
 }
 
+
 void Breakout::display(void) {
 	
     // Clear buffer
@@ -33,6 +34,7 @@ void Breakout::display(void) {
     //drawBackground();
 	glTranslatef(0.0,0.0,Tz);
 	glRotatef(Sx,1.0,0.0,0.0);
+	
     // Select which state of the game to display
     switch (gameState) {
         case INIT:
@@ -171,8 +173,8 @@ void Breakout::newBall(float x = -1, float y = -1) {
     b1.xpos = 0.0;
     b1.ypos = -4.8f;
     
-	b1.xvel = 0.15f;
-    b1.yvel = 0.05f;
+	b1.xvel = 0.15f/1.5;
+    b1.yvel = 0.05f/1.5;
     b1.radius = BALL_RADIUS;
     b1.r = 0.4f + (float) rand() / (RAND_MAX);
     b1.g = 0.25f + (float) rand() / (RAND_MAX);
@@ -181,7 +183,7 @@ void Breakout::newBall(float x = -1, float y = -1) {
 }
 
 void Breakout::drawBalls(void) {
-    for (vector<Ball>::iterator it = balls.begin(); it != balls.end(); ) {
+    for( vector<Ball>::iterator it = balls.begin(); it != balls.end(); ) {
         glPushMatrix();
 		   	glColor3f(it->r, it->g, it->b);
 		   	glTranslatef(it->xpos, it->ypos, 0.0);
@@ -195,23 +197,23 @@ void Breakout::drawBalls(void) {
         it->ypos += it->yvel;
         
         // Collision with left/right/top window sides
-        if (it->xpos > 4.7f || it->xpos < -4.7f) {
+        if(it->xpos > 4.7f || it->xpos < -4.7f) {
             it->xvel *= -1;
         }
-        if (it->ypos > 5.2f) {
+        if(it->ypos > 5.2f) {
             it->yvel *= -1;
         }
-        if (it->ypos < -5.2f) {
+        if(it->ypos < -5.2f) {
             it = balls.erase(it);
             continue;
         }
-        
+        //br->width/2, br->height/2
         // Collission with the bricks
-        for (std::vector<Brick>::iterator br = bricks.begin(); br != bricks.end(); ) {
+        for( std::vector<Brick>::iterator br = bricks.begin(); br != bricks.end(); ) {
             // Check collission between circle and vertical brick sides
-            if (it->ypos - it->radius >= br->ypos - 0.125f && it->ypos + it->radius <= br->ypos + 0.125f) {
+            if( (it->ypos + it->radius >= br->ypos - br->height/2) && (it->ypos - it->radius <= br->ypos + br->height/2) ) {
                 // brick right edge and left point on circle
-                if (it->xpos - it->radius <= br->xpos + 0.25f && it->xpos - it->radius >= br->xpos - 0.25f) {
+                if( (it->xpos - it->radius <= br->xpos + br->width/2) && (it->xpos + it->radius > br->xpos + br->width/2) ) {
                     it->xvel *= -1;
                     br = hitBrick(br);
                     cout << "Direita" << endl;
@@ -219,7 +221,7 @@ void Breakout::drawBalls(void) {
                 }
                 
                 // brick left edge and right point on circle
-                if (it->xpos + it->radius >= br->xpos - 0.25f && it->xpos + it->radius <= br->xpos + 0.25f) {
+                if( (it->xpos + it->radius >= br->xpos - br->width/2) && (it->xpos - it->radius < br->xpos - br->width/2) ) {
                     it->xvel *= -1;
                     br = hitBrick(br);
                     cout << "Esquerda" << endl;
@@ -228,9 +230,9 @@ void Breakout::drawBalls(void) {
             }
             
             // Check collission between circle and horizontal brick sides
-            if (it->xpos - it->radius >= br->xpos - 0.25f && it->xpos + it->radius <= br->xpos + 0.25f) {
+            if( (it->xpos - it->radius <= br->xpos + br->width/2) && (it->xpos + it->radius >= br->xpos - br->width/2) ) {
                 // brick bottom edge and top point on circle
-                if (it->ypos + it->radius >= br->ypos - 0.125f && it->ypos + it->radius <= br->ypos + 0.125f) {
+                if( (it->ypos + it->radius >= br->ypos - br->height/2) && (it->ypos - it->radius < br->ypos - br->height/2) ) {
                     it->yvel *= -1;
                     br = hitBrick(br);
                     cout << "Baixo" << endl;
@@ -238,7 +240,7 @@ void Breakout::drawBalls(void) {
                 }
                 
                 // brick top edge and bottom point on circle
-                if (it->ypos - it->radius <= br->ypos + 0.125f && it->ypos - it->radius >= br->ypos - 0.125f) {
+                if( (it->ypos - it->radius <= br->ypos + br->height/2) && (it->ypos + it->radius > br->ypos + br->height/2) ) {
                     it->yvel *= -1;
                     br = hitBrick(br);
                     cout << "Cima" << endl;
@@ -246,53 +248,12 @@ void Breakout::drawBalls(void) {
                 }
             }
             
-            GLfloat d;
-            // Check collission with top left corner
-            d = pow((it->xpos - br->xpos - 0.25f), 2.0) + pow((it->ypos - br->ypos + 0.125f), 2.0);
-            if (d < it->radius - 1.0) {
-                it->xvel *= -1;
-                it->yvel *= -1;
-                br = hitBrick(br);
-                cout << "bottom right" << endl;
-                continue;
-            }
-
-            // Check collission with top right corner
-            d = pow((it->xpos - br->xpos + 0.25f), 2.0) + pow((it->ypos - br->ypos + 0.125f), 2.0);
-            if (d < it->radius - 1.0) {
-                it->xvel *= -1;
-                it->yvel *= -1;
-                br = hitBrick(br);
-                cout << "bottom left" << endl;
-                continue;
-            }
-
-            // Check collission with bottom left corner
-            d = pow((it->xpos - br->xpos - 0.25f), 2.0) + pow((it->ypos - br->ypos - 0.125f), 2.0);
-            if (d < it->radius - 1.0) {
-                it->xvel *= -1;
-                it->yvel *= -1;
-                br = hitBrick(br);
-                cout << "top right" << endl;
-                continue;
-            }
-            
-            // Check collission with bottom right corner
-            d = pow((it->xpos - br->xpos + 0.25f), 2.0) + pow((it->ypos - br->ypos - 0.125f), 2.0);
-            if (d < it->radius - 1.0) {
-                it->xvel *= -1;
-                it->yvel *= -1;
-                br = hitBrick(br);
-                cout << "top left" << endl;
-                continue;
-            }
-            
             ++br; // next brick
         }
         
         // Check collission between paddle's top edge and bottom point on circle
-        if (it->xpos - it->radius >= paddle.xpos - paddle.width/2 && it->xpos + it->radius <= paddle.xpos + paddle.width/2) {
-            if (it->ypos - it->radius <= paddle.ypos + paddle.height/2 && it->ypos - it->radius >= paddle.ypos - paddle.height/2 ) {
+        if( (it->xpos - it->radius <= paddle.xpos + paddle.width/2) && (it->xpos + it->radius >= paddle.xpos - paddle.width/2) ) {
+            if( (it->ypos - it->radius <= paddle.ypos + paddle.height/2) && (it->ypos + it->radius > paddle.ypos + paddle.height/2) ) {
                 it->yvel *= -1;
                 reward = 100;
                 score += reward;
@@ -330,7 +291,7 @@ void Breakout::drawBricks(void) {
 		glPushMatrix();
     		glColor3f(it->r, it->g, it->b);
 			glTranslatef(it->xpos, it->ypos, 0);
-			glScalef(1.0, 0.5, 0.5);
+			glScalef(it->width, it->height, it->height);
 			// glutSolidCube(0.5);
 			objects.drawCube(0.5);
 		glPopMatrix();
@@ -368,7 +329,7 @@ void Breakout::bricksLevel1(void) {
     newBrick.g = 0.95f;
     newBrick.b = 0.95f;
     newBrick.health = 1;
-    newBrick.width = 0.8;
+    newBrick.width = 1.0;
     newBrick.height = 0.5;
     
     for (int i = 0; i < WALLROWS; ++i) {

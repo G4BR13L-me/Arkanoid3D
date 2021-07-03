@@ -12,11 +12,9 @@
 #include <vector>
 #include <iostream>
 #include <stdlib.h>
-// #include <math.h>
-// #include<GL/glut.h>
+#include <stdio.h>
 
 // My includes
-// #include "MyObjects.cpp"
 #include "MyObjects.h"      // Game-specific objects
 #include "config.h"         // Game configurations
 
