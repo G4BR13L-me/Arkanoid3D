@@ -16,7 +16,7 @@
 		<AutoIncrementBuild Value="No"/>
 	</VersionInfo>
 	<Libs Value="-static -lglut32 -lglu32 -lopengl32 -lwinmm -lgdi32"/>
-	<Flags Value="-DGLUT_STATIC"/>
+	<Flags Value="-DGLUT_STATIC -Iaudios"/>
 	<Target Value="Arkanoid.exe"/>
 	<CommandLine Value=""/>
 	<CompilerOptions Value="-Wall -s"/>
@@ -29,12 +29,14 @@
 	<CompilerType Value="CPP"/>
 	<AppType Value="CONSOLE"/>
 	<Files>
-		<File Name="Breakout.cpp"/>
-		<File Name="Breakout.h"/>
+		<File Name="game.cpp"/>
+		<File Name="game.h"/>
 		<File Name="config.h"/>
-		<File Name="MyObjects.h"/>
+		<File Name="myObjects.h"/>
 		<File Name="main.cpp"/>
-		<File Name="MyObjects.cpp"/>
+		<File Name="myObjects.cpp"/>
+		<File Name="sound.h"/>
+		<File Name="sound.cpp"/>
 	</Files>
 	<AppIcon>
 		0000010001003030000001002000A82500001600000028000000300000006000

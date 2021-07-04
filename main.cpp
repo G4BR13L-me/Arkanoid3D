@@ -1,17 +1,8 @@
-//
-//  main.cpp
-//  ogamalBreakout
-//
-//  Created by Osama Attia on 9/21/14.
-//  ogamal@iastate.edu
-//
-
 #include <iostream>
 #include <assert.h>
-#include "Breakout.h"
+#include "game.h"
 
-
-Breakout game;
+Game game;
 
 // Define the display function
 void myDisplay()
@@ -29,12 +20,6 @@ void myReshape(int width, int height)
 void myMouseClick(int button, int state, int x, int y)
 {
 	game.mouseClick(button, state, x, y);
-}
-
-// Define the mouse drag events
-void myMouseMove(int x, int y)
-{
-	game.mouseMove(x, y);
 }
 
 // Define keystroke events
@@ -69,9 +54,6 @@ int main(int argc, char ** argv)
 	glutReshapeFunc(myReshape);
 	// Handle mouse clicks
 	glutMouseFunc(myMouseClick);
-	// Handle mouse motion
-//	glutMotionFunc(myMouseMove);
-    glutPassiveMotionFunc(myMouseMove);
 	// Handle keyboard strokes
 	glutKeyboardFunc(myKeyStroke);
 	// specify keyboard special key input events

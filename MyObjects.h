@@ -1,13 +1,5 @@
-//
-//  MyObjects.h
-//  ogamalBreakout
-//
-//  Created by Osama Attia on 9/23/14.
-//  ogamal@iastate.edu
-//
-
-#ifndef ogamalBreakout_MyObjects_h
-#define ogamalBreakout_MyObjects_h
+#ifndef MyObjects_h
+#define MyObjects_h
 
 #include<GL/glut.h>
 #include <math.h>
@@ -54,25 +46,21 @@ public:
 	~MyObjects();
 	
     // 3D model handle
- 	/* Coordenadas dos vértices do objeto: */
 	GLfloat vertices[N_VERTICES][3];
 	
-	/* Triângulos do objeto (vértices que os constituem) */
 	GLuint faces[N_FACES][3];
 	
-	/* Vetores normais aos vértices do objeto: */
 	GLfloat vertex_normals[N_VERTICES][3];
 	
-	/* Vetores normais aos triângulos do objeto: */
 	GLfloat face_normals[N_FACES][3];
 	
 	void drawCube(GLfloat size);
 	
-	void normalizar(ponto * n);
+	void normalize(ponto * n);
 	    
-	void calcularNormaisFaces(void);
+	void evaluateFaceNormals(void);
 	
-	void calcularNormaisVertices(void);
+	void evaluateVerticesNormals(void);
 	
 };
 
