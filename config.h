@@ -9,14 +9,9 @@
 const int WINWIDTH  = 800;
 const int WINHEIGHT = 600;
 
-// Wall settings
-const int WALLWIDTH = 700;                          // Wall width
-const int WALLHEIGHT = 180;                         // Wall height
-const float WALLX = (WINWIDTH - WALLWIDTH) / 2.0f;  // Wall start point(x)
-const float WALLY = WALLX + 40;                     // Wall start point(y)
-const float WALLSPACE = 0.2;                            // Space between bricks
-const int WALLCOLS = 8;                            // Wall columns count
-const int WALLROWS = 6;                            // Wall rows count
+// Brick settings
+const int BRICKCOLS = 8;
+const int BRICKROWS = 6;      
 
 // Pedal Settings
 const float PEDALWIDTH = 150.0f;

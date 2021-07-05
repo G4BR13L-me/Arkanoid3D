@@ -316,10 +316,10 @@ void Game::initBricks(void) {
     else
         generateBricks(2);
 }
-
+ 
 void Game::generateBricks(int level) {
 	bool strongerBrick;
-	int rows = WALLROWS, cols = WALLCOLS;
+	int rows = BRICKROWS, cols = BRICKCOLS;
 	if(level ==1)
 		rows += -2;
 		
@@ -334,7 +334,7 @@ void Game::generateBricks(int level) {
         	// Set stronger bricks
         	strongerBrick = ( level == 1 
 					? ((i+j)%2 != 0) // Level 1 
-					: (i == 1 || i == WALLROWS - 2 || j == 2 || j == WALLCOLS - 3)); //Level 2
+					: (i == 1 || i == rows - 2 || j == 2 || j == cols - 3)); //Level 2
 			
 			if (strongerBrick) {
                 newBrick.r = 1.0f;
@@ -406,10 +406,11 @@ void Game::drawScoreLevel(void) {
 		drawWord(word+value);
 		
 		// Write Level
-		word = "  Level: ";  
-		ss << level;  
-		ss >> value;
-		drawWord(word+value);
+		if(level == 1)
+			word = "  Level: 1";
+		else
+			word = "  Level: 2"; 
+		drawWord(word);
     glPopMatrix();
 }
 
